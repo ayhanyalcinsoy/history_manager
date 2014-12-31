@@ -1,8 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006-2009 TUBITAK/UEKAE
-#
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
 # Software Foundation; either version 2 of the License, or (at your option)
@@ -67,14 +65,14 @@ class Install(install):
     def run(self):
         os.system("./setup.py build")
         if self.root:
-            kde_dir = "%s/usr/share/kde4" % self.root
+            kde_dir = "%s/usr/" % self.root
         else:
-            kde_dir = "/usr/share/kde4"
+            kde_dir = "/usr/"
         bin_dir = os.path.join(kde_dir, "bin")
-        locale_dir = os.path.join("/usr/share/locale")
-        service_dir = os.path.join(kde_dir, "services")
-        apps_dir = os.path.join(kde_dir, "applications")
-        project_dir = os.path.join(kde_dir, "apps", about.appName)
+        locale_dir = os.path.join(kde_dir, "share/locale")
+        service_dir = os.path.join(kde_dir, "share/kde4/services")
+        apps_dir = os.path.join(kde_dir, "share/applications/kde4/applications")
+        project_dir = os.path.join(kde_dir, "share/apps", about.appName)
 
         # Make directories
         print "Making directories..."
