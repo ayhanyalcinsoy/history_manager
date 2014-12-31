@@ -27,7 +27,7 @@ def update_messages():
     os.makedirs(".tmp")
     # Collect UI files
     for filename in glob.glob1("ui", "*.ui"):
-         os.system("/usr/bin/pykde4uic -o .tmp/ui_%s.py ui/%s" % (filename.split(".")[0], filename))
+        os.system("/usr/bin/pykde4uic -o .tmp/ui_%s.py ui/%s" % (filename.split(".")[0], filename))
     # Collect Python files
     os.system("cp -R code/* .tmp/")
     # Generate POT file
