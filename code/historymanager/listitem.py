@@ -4,8 +4,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-from PyKDE4.kdecore import *
-
 from uiitem import Ui_HistoryItemWidget
 
 # Keep this for translation generation

@@ -4,9 +4,6 @@
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
-from PyKDE4.kdeui import *
-from PyKDE4.kdecore import *
-
 from mainwindow import Ui_MainManager
 from uiitem import Ui_HistoryItemWidget
 from configure import Ui_Configure
