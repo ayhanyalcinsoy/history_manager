@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2011 TUBITAK/UEKAE, 2014 Pisi Linux Team
+# Copyright (C) 2009, TUBITAK/UEKAE
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
@@ -11,70 +11,56 @@
 # Please read the COPYING file.
 #
 
-# System
 import sys
 import dbus
-# Pds Stuff
-import historymanager.context as ctx
 
-# Application Stuff
-import historymanager.about as about
+from PyQt4 import QtGui
+from PyQt4.QtCore import *
 
-# Qt Stuff
-from PyQt4.QtCore import SIGNAL
+from PyKDE4.kdeui import *
+from PyKDE4.kdecore import *
 
-#from historymanager.about import aboutData, catalog
-#from historymanager.window import MainManager
+from historymanager.about import aboutData, catalog
+from historymanager.window import MainManager
 
-# Enable plugin if session is Kde4
-if ctx.Pds.session == ctx.pds.Kde4:
-    def CreatePlugin(widget_parent, parent, component_data):
-        from historymanager.kcmodule import HistoryManager
-        return HistoryManager(component_data, parent)
+class Module(KCModule):
+    def __init__(self, component_data, parent):
+        KCModule.__init__(self, component_data, parent)
+
+        KGlobal.locale().insertCatalog(catalog)
+
+        if not dbus.get_default_main_loop():
+            from dbus.mainloop.qt import DBusQtMainLoop
+            DBusQtMainLoop(set_as_default = True)
+
+        MainManager(self, standAlone=False)
+
+class MainWindow(KMainWindow):
+    def __init__(self, app, parent=None):
+        KMainWindow.__init__(self, parent)
+
+        settings = QSettings()
+
+        if settings.contains("pos") and settings.contains("size"):
+            self.move(self.mapToGlobal(settings.value("pos").toPoint()))
+            self.resize(settings.value("size").toSize())
+
+        self.setWindowIcon(QtGui.QIcon(":/icons/history-manager.png"))
+
+        self.setCentralWidget(MainManager(self, True, app))
+
+def CreatePlugin(widget_parent, parent, component_data):
+    return Module(component_data, parent)
+
+if __name__ == '__main__':
+    KCmdLineArgs.init(sys.argv, aboutData)
+    app = KUniqueApplication()
 
     if not dbus.get_default_main_loop():
         from dbus.mainloop.qt import DBusQtMainLoop
         DBusQtMainLoop(set_as_default = True)
 
-        # Pds vs KDE
-    if ctx.Pds.session == ctx.pds.Kde4:
+    mainWindow = MainWindow(app)
+    mainWindow.show()
 
-        # PyKDE4 Stuff
-        from PyKDE4.kdeui import *
-        from PyKDE4.kdecore import *
-
-        # Application Stuff
-        from historymanager.window import HistoryManager
-        from historymanager.about import aboutData
-
-        # Set Command-line arguments
-        KCmdLineArgs.init(sys.argv, aboutData)
-
-        # Create a Kapplitcation instance
-        app = KApplication()
-
-        # Create Main Widget
-        mainWindow = HistoryManager(None, aboutData.appName)
-        mainWindow.show()
-
-    else:
-
-        # Application Stuff
-        from historymanager.window import MainManager
-
-        # Pds Stuff
-        from pds.quniqueapp import QUniqueApplication
-        from historymanager.context import KIcon, i18n
-
-        # Create a QUniqueApllication instance
-        app = QUniqueApplication(sys.argv, catalog=about.appName)
-
-        # Create Main Widget and make some settings
-        mainWindow = MainManager(None)
-        mainWindow.show()
-        mainWindow.resize(640, 480)
-        mainWindow.setWindowTitle(i18n(about.PACKAGE))
-        mainWindow.setWindowIcon(KIcon(about.icon))
-
-    # Run the applications
     app.exec_()

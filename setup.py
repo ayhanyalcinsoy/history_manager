@@ -14,33 +14,20 @@ import glob
 import shutil
 import sys
 
-from code.historymanager import about
-
 from distutils.core import setup
 from distutils.cmd import Command
 from distutils.command.build import build
 from distutils.command.install import install
 
-PROJECT = about.appName
-FOR_KDE_4=False
-
-if 'kde4' in sys.argv:
-    sys.argv.remove('kde4')
-    FOR_KDE_4=True
-    print 'UI files will be created for KDE 4.. '
+from code.historymanager import about
 
 def update_messages():
     # Create empty directory
     os.system("rm -rf .tmp")
     os.makedirs(".tmp")
-    # UI files for kde4
-    if FOR_KDE_4:
-        for filename in glob.glob1("ui", "*.ui"):
-            os.system("pykde4uic -o ui/ui_%s.py ui/%s" % (filename.split(".")[0], filename))
-    #UI files for pure-qt
-    else :
-        for filename in glob.glob1("ui", "*.ui"):
-           os.system("pyuic4 -o ui/ui_%s.py ui/%s -g %s" % (filename.split(".")[0], filename, PROJECT))
+    # Collect UI files
+    for filename in glob.glob1("ui", "*.ui"):
+        os.system("/usr/bin/pykde4uic -o .tmp/ui_%s.py ui/%s" % (filename.split(".")[0], filename))
     # Collect Python files
     os.system("cp -R code/* .tmp/")
     # Generate POT file
@@ -68,14 +55,8 @@ class Build(build):
         os.system("cp -R code/ build/")
         # Copy compiled UIs and RCs
         print "Generating UIs..."
-        # Collect UI for kde4
-        if FOR_KDE_4:
-            for filename in glob.glob1("ui", "*.ui"):
-                os.system("pykde4uic -o build/historymanager/ui_%s.py ui/%s" % (filename.split(".")[0], filename))
-        # Collect UI for pure-qt
-        else:
-            for filename in glob.glob1("ui", "*.ui"):
-                os.system("pyuic4 -o build/historymanager/ui_%s.py ui/%s -g %s" % (filename.split(".")[0], filename, PROJECT))
+        for filename in glob.glob1("ui", "*.ui"):
+            os.system("/usr/bin/pykde4uic -o build/%s/%s.py ui/%s" % (about.modName, filename.split(".")[0], filename))
         #print "Generating RCs..."
         #for filename in glob.glob1("data", "*.qrc"):
         #    os.system("/usr/bin/pyrcc4 data/%s -o build/%s_rc.py" % (filename, filename.split(".")[0]))
@@ -84,38 +65,27 @@ class Install(install):
     def run(self):
         os.system("./setup.py build")
         if self.root:
-            root_dir = "%s/usr/share" % self.root
-            bin_dir = os.path.join(self.root, "usr/bin")
+            kde_dir = "%s/usr/" % self.root
         else:
-            root_dir = "/usr/share"
-            bin_dir = "/usr/bin"
-
-        locale_dir = os.path.join(root_dir, "locale")
-        if FOR_KDE_4:
-            apps_dir = os.path.join(root_dir, "applications/kde4")
-            services_dir = os.path.join(root_dir, "kde4/services")
-            project_dir = os.path.join(root_dir, "kde4/apps", PROJECT)
-        else:
-            apps_dir = os.path.join(root_dir, "applications")
-            project_dir = os.path.join(root_dir, PROJECT)
+            kde_dir = "/usr/"
+        bin_dir = os.path.join(kde_dir, "bin")
+        locale_dir = os.path.join(kde_dir, "share/locale")
+        service_dir = os.path.join(kde_dir, "share/kde4/services")
+        apps_dir = os.path.join(kde_dir, "share/applications/kde4/applications")
+        project_dir = os.path.join(kde_dir, "share/apps", about.appName)
 
         # Make directories
         print "Making directories..."
         makeDirs(bin_dir)
         makeDirs(locale_dir)
+        makeDirs(service_dir)
         makeDirs(apps_dir)
         makeDirs(project_dir)
-        if FOR_KDE_4:
-            makeDirs(services_dir)
 
         # Install desktop files
         print "Installing desktop files..."
-
-        shutil.copy("resources/%s.desktop" % PROJECT, apps_dir)
-        if FOR_KDE_4:
-            shutil.copy("resources/kcm_%s.desktop" % PROJECT, services_dir)
-        #shutil.rmtree('resources/')
-
+        shutil.copy("resources/kcm_%s.desktop" % about.modName, service_dir)
+        shutil.copy("resources/%s.desktop" % about.modName, apps_dir)
 
         # Install codes
         print "Installing codes..."
@@ -165,8 +135,8 @@ if "update_messages" in sys.argv:
 setup(
       name              = about.appName,
       version           = about.version,
-      #description       = unicode(about.description),
-      #license           = unicode(about.license),
+      description       = unicode(about.description),
+      license           = unicode(about.license),
       author            = "",
       author_email      = about.bugEmail,
       url               = about.homePage,

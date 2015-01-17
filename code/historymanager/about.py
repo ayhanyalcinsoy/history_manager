@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2011 TUBITAK/UEKAE, 2014 Pisi Linux (Anka) Team
+# Copyright (C) 2009, TUBITAK/UEKAE
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
@@ -11,35 +11,25 @@
 # Please read the COPYING file.
 #
 
-# PDS Stuff
-import context as ctx
+# PyKDE4 Stuff
+from PyKDE4.kdecore import *
 
 # Application Data
-PACKAGE     = "History Manager"
 appName     = "history-manager"
 modName     = "historymanager"
+catalog     = appName
+programName = ki18n("History Manager")
 version     = "0.2.7.1"
+description = ki18n("History Manager")
+license     = KAboutData.License_GPL
+copyright   = ki18n("(c) 2009 TUBITAK/UEKAE")
+text        = ki18n(None)
 homePage    = "http://www.pardus.org.tr/eng/projects"
 bugEmail    = "bugs@pardus.org.tr"
-icon        = "history-manager.png"
-catalog     = appName
+aboutData   = KAboutData(appName, catalog, programName, version, description, license, copyright, text, homePage, bugEmail)
 
-if ctx.Pds.session == ctx.pds.Kde4:
+# Authors
+aboutData.addAuthor (ki18n("İşbaran Akçayır"), ki18n("Current Maintainer"))
 
-    # PyKDE4 Stuff
-    from PyKDE4.kdecore import KAboutData, ki18n, ki18nc
-
-    programName = ki18n(PACKAGE)
-    description = ki18n(PACKAGE)
-    license     = KAboutData.License_GPL
-    copyright   = ki18n("(c) 2009-2010 TUBITAK/UEKAE")
-    text        = ki18n(None)
-    aboutData   = KAboutData(appName, catalog, programName, version, description, license, copyright, text, homePage, bugEmail)
-
-    # Authors
-    aboutData.addAuthor(ki18n("İşbaran Akçayır"), ki18n("Old Maintainer"))
-    aboutData.addAutho(ki18n("Ayhan Yalçınsoy"), ki18n("Current Maintainer"))
-    aboutData.setTranslator(ki18nc("NAME OF TRANSLATORS", "Your names"), ki18nc("EMAIL OF TRANSLATORS", "Your emails"))
-
-    # Use this if icon name is different than appName
-    aboutData.setProgramIconName(icon)
+# Use this if icon name is different than appName
+aboutData.setProgramIconName("user-away-extended")
