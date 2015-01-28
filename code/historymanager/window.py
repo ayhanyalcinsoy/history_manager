@@ -1,15 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# System
+import sys
+import comar
 
+# Qt Stuff
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-
-from PyKDE4.kdeui import *
-from PyKDE4.kdecore import *
-
-from mainwindow import Ui_MainManager
-from uiitem import Ui_HistoryItemWidget
-from configure import Ui_Configure
+#from PyQt4.QtGui import QMessageBox
+#from PyQt4.QtCore import *
+# Add the ptdraft folder path to the sys.path list
+#sys.path.append('/path/to/history_manager/ui/')
+# Application Stuff
+from ui_uiitem import Ui_HistoryItemWidget
+from ui_configure import Ui_Configure
+from ui_mainwindow import Ui_MainManager
 
 from interface import *
 
@@ -17,6 +22,14 @@ SHOW, HIDE     = 0, 1
 TARGET_HEIGHT  = 0
 ANIMATION_TIME = 200
 DEFAULT_HEIGHT = 16777215
+
+# Pds vs KDE
+import historymanager.context as ctx
+if ctx.Pds.session == ctx.pds.Kde4:
+    from PyKDE4.kdecore import i18n
+else:
+    from historymanager.context import i18n
+
 
 class MainManager(QtGui.QWidget):
     def __init__(self, parent, standAlone=True, app=None):

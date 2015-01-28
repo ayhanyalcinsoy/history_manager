@@ -11,56 +11,75 @@
 # Please read the COPYING file.
 #
 
+# SyStem
 import sys
 import dbus
 
-from PyQt4 import QtGui
-from PyQt4.QtCore import *
+# Pds Stuff
+import historymanager.context as ctx
 
-from PyKDE4.kdeui import *
-from PyKDE4.kdecore import *
+# Application Stuff
+import historymanager.about as about
 
-from historymanager.about import aboutData, catalog
-from historymanager.window import MainManager
+# Qt Stuff
+from PyQt4.QtCore import SIGNAL
 
-class Module(KCModule):
-    def __init__(self, component_data, parent):
-        KCModule.__init__(self, component_data, parent)
-
-        KGlobal.locale().insertCatalog(catalog)
-
-        if not dbus.get_default_main_loop():
-            from dbus.mainloop.qt import DBusQtMainLoop
-            DBusQtMainLoop(set_as_default = True)
-
-        MainManager(self, standAlone=False)
-
-class MainWindow(KMainWindow):
-    def __init__(self, app, parent=None):
-        KMainWindow.__init__(self, parent)
-
-        settings = QSettings()
-
-        if settings.contains("pos") and settings.contains("size"):
-            self.move(self.mapToGlobal(settings.value("pos").toPoint()))
-            self.resize(settings.value("size").toSize())
-
-        self.setWindowIcon(QtGui.QIcon(":/icons/history-manager.png"))
-
-        self.setCentralWidget(MainManager(self, True, app))
-
-def CreatePlugin(widget_parent, parent, component_data):
-    return Module(component_data, parent)
-
+# Enable plugin if session is Kde4
+if ctx.Pds.session == ctx.pds.Kde4:
+    def CreatePlugin(widget_parent, parent, component_data):
+        from historymanager.kcmodule import ServiceManager
+        return HistoryManager(component_data, parent)
+    
 if __name__ == '__main__':
-    KCmdLineArgs.init(sys.argv, aboutData)
-    app = KUniqueApplication()
 
+    # DBUS MainLoop
     if not dbus.get_default_main_loop():
         from dbus.mainloop.qt import DBusQtMainLoop
         DBusQtMainLoop(set_as_default = True)
+        
+    # Pds vs KDE
+    if ctx.Pds.session == ctx.pds.Kde4:
 
-    mainWindow = MainWindow(app)
-    mainWindow.show()
+        # PyKDE4 Stuff
+        from PyKDE4.kdeui import *
+        from PyKDE4.kdecore import *
+        
+        # Application Stuff
+        from historymanager.standalone import HistoryManager
+        from historymanager.about import aboutData
+        
+        # Set Commandline arguments
+        KCmdLineArgs.init(sys.argv, aboutData)
+        
+        # Create a Kapplication instance
+        app = KApplication()
+        
+        # Create Main Widget
+        mainWindow = HistoryManager(None, aboutData.appName)
+        mainWindow.show()
 
+    else:
+
+        # Application Stuff
+        from historymanager.window import MainManager
+
+        # Pds Stuff
+        from pds.quniqueapp import QUniqueApplication
+        from historymanager.context import KIcon, i18n
+
+        # Create a QUniqueApllication instance
+        app = QUniqueApplication(sys.argv, catalog=about.appName)
+
+        # Create Main Widget and make some settings
+        mainWindow = MainManager(None, app= app)
+        mainWindow.show()
+        mainWindow.resize(640, 480)
+        mainWindow.setWindowTitle(i18n(about.PACKAGE))
+        #mainWindow.setWindowIcon(KIcon(about.icon))
+
+    # Create connection for lastWindowClosed signal to quit app
+    app.connect(app, SIGNAL('lastWindowClosed()'), app.quit)
+
+    # Run the applications
     app.exec_()
+    
